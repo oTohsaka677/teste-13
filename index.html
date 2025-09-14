@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Fichas - Ordem Paranormal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e1e2e, #2d2d42);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            border: 2px solid #ff6b6b;
+        }
+
+        .header h1 {
+            color: #ff6b6b;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+        }
+
+        .user-section {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .user-id {
+            font-size: 0.9em;
+            color: #4ecdc4;
+            font-family: 'Courier New', monospace;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .character-card {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid #333;
+            transition: all 0.3s ease;
+        }
+
+        .character-card:hover {
+            transform: translateY(-5px);
+            border-color: #ff6b6b;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.2);
+        }
+
+        .character-banner {
+            height: 120px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .character-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid #fff;
+            position: absolute;
+            bottom: -40px;
+            left: 20px;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            overflow: hidden;
+        }
+
+        .character-info {
+            padding: 50px 20px 20px;
+        }
+
+        .character-name {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ff6b6b;
+        }
+
+        .character-details {
+            color: #ccc;
+            line-height: 1.6;
+        }
+
+        .race-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .race-humano { background: #4ecdc4; }
+        .race-kaiju { background: #ff6b6b; }
+        .race-demonio { background: #8b5cf6; }
+        .race-cyborg { background: #10b981; }
+        .race-mutante { background: #f59e0b; }
+
+        .empty-slot {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed #666;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+            min-height: 250px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #2d2d42, #1e1e2e);
+            margin: 2% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 2px solid #ff6b6b;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #333;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+            font-family: inherit;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #ff6b6b;
+        }
+
+        .close:hover {
+            opacity: 0.7;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .char-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .char-actions button {
+            font-size: 0.8em;
+            padding: 8px 16px;
+        }
+
+        .username-display {
+            background: rgba(78, 205, 196, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #4ecdc4;
+        }
+
+        .slots-info {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .import-export-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 1px solid #333;
+        }
+
+        .file-input {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Fichas Pessoais</h1>
+            <p>Gerencie seus personagens e suas habilidades</p>
+        </div>
+
+        <div class="user-section">
+            <div class="user-info">
+                <div class="user-details">
+                    <div><span>Usuário: <strong id="currentUser">Carregando...</strong></span></div>
+                    <div class="user-id">ID: <span id="userId">Gerando...</span></div>
+                </div>
+                <div>
+                    <button class="btn btn-secondary" onclick="changeUsername()">Alterar Nome</button>
+                    <button class="btn btn-danger" onclick="resetUser()" title="Limpar todos os dados">Reset</button>
+                </div>
+            </div>
+            <div class="username-display">
+                <h3>👤 Bem-vindo ao seu painel pessoal!</h3>
+                <p>Suas fichas são privadas e ficam salvas automaticamente. Apenas você pode vê-las e editá-las.</p>
+            </div>
+        </div>
+
+        <div class="slots-info">
+            <h3>🎭 Suas Fichas de Personagem</h3>
+            <p>Slots utilizados: <span id="slotsUsed">0</span>/6</p>
+        </div>
+
+        <div class="character-grid" id="characterGrid">
+            <!-- Fichas serão inseridas aqui -->
+        </div>
+
+        <!-- Seção de Import/Export -->
+        <div class="import-export-section">
+            <h3>💾 Backup dos seus dados</h3>
+            <p>Você pode fazer backup das suas fichas para não perdê-las:</p>
+            <div style="margin: 15px 0; display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn btn-secondary" onclick="exportData()">Baixar Backup</button>
+                <button class="btn" onclick="document.getElementById('importFile').click()">Restaurar Backup</button>
+            </div>
+            <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+        </div>
+    </div>
+
+    <!-- Modal para criar/editar personagem -->
+    <div id="characterModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle">Criar Novo Personagem</h2>
+            
+            <form id="characterForm">
+                <div class="form-group">
+                    <label for="charName">Nome do Personagem:</label>
+                    <input type="text" id="charName" required>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="form-group">
+                        <label for="charAge">Idade:</label>
+                        <input type="number" id="charAge" min="1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="charHeight">Altura (cm):</label>
+                        <input type="number" id="charHeight" min="1" required>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="form-group">
+                        <label for="charWeight">Peso (kg):</label>
+                        <input type="number" id="charWeight" min="1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="charRace">Raça:</label>
+                        <select id="charRace" required>
+                            <option value="">Selecione uma raça</option>
+                            <option value="humano">Humano</option>
+                            <option value="kaiju">Kaiju</option>
+                            <option value="demonio">Demônio</option>
+                            <option value="cyborg">Cyborg</option>
+                            <option value="mutante">Mutante</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="charAvatar">Foto do Personagem (URL):</label>
+                    <input type="url" id="charAvatar" placeholder="https://exemplo.com/foto.jpg">
+                </div>
+
+                <div class="form-group">
+                    <label for="charBanner">Banner (URL):</label>
+                    <input type="url" id="charBanner" placeholder="https://exemplo.com/banner.jpg">
+                </div>
+
+                <div class="form-group">
+                    <label for="charDescription">Descrição/História:</label>
+                    <textarea id="charDescription" placeholder="Conte a história do seu personagem..."></textarea>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button type="submit" class="btn">Salvar Personagem</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Sistema de identificação única do usuário
+        let currentUserId = '';
+        let currentUsername = '';
+        let characters = [];
+        let editingCharIndex = -1;
+
+        // Gerar ID único baseado em características do navegador/dispositivo
+        function generateUniqueId() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.textBaseline = 'top';
+            ctx.font = '14px Arial';
+            ctx.fillText('Fingerprint', 2, 2);
+            
+            const fingerprint = canvas.toDataURL();
+            const userAgent = navigator.userAgent;
+            const screen = `${window.screen.width}x${window.screen.height}`;
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const language = navigator.language;
+            
+            const combined = fingerprint + userAgent + screen + timezone + language;
+            
+            // Hash simples
+            let hash = 0;
+            for (let i = 0; i < combined.length; i++) {
+                const char = combined.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            
+            return 'USER_' + Math.abs(hash).toString(16).toUpperCase();
+        }
+
+        // Inicialização
+        window.onload = function() {
+            // Gerar ou recuperar ID único
+            currentUserId = localStorage.getItem('rpg_user_id');
+            if (!currentUserId) {
+                currentUserId = generateUniqueId();
+                localStorage.setItem('rpg_user_id', currentUserId);
+            }
+
+            // Recuperar nome de usuário
+            currentUsername = localStorage.getItem('rpg_username') || 'Jogador';
+
+            // Recuperar personagens
+            const savedChars = localStorage.getItem(`rpg_characters_${currentUserId}`);
+            if (savedChars) {
+                try {
+                    characters = JSON.parse(savedChars);
+                } catch (e) {
+                    console.error('Erro ao carregar personagens:', e);
+                    characters = [];
+                }
+            }
+
+            updateUserInfo();
+            renderCharacters();
+            showNotification('Dados carregados com sucesso!', 'success');
+        };
+
+        function updateUserInfo() {
+            document.getElementById('currentUser').textContent = currentUsername;
+            document.getElementById('userId').textContent = currentUserId;
+            updateSlotsInfo();
+        }
+
+        function updateSlotsInfo() {
+            document.getElementById('slotsUsed').textContent = characters.length;
+        }
+
+        function saveData() {
+            try {
+                localStorage.setItem(`rpg_characters_${currentUserId}`, JSON.stringify(characters));
+                localStorage.setItem('rpg_username', currentUsername);
+                return true;
+            } catch (e) {
+                console.error('Erro ao salvar dados:', e);
+                showNotification('Erro ao salvar dados!', 'error');
+                return false;
+            }
+        }
+
+        function changeUsername() {
+            const newUsername = prompt('Digite seu novo nome de usuário:', currentUsername);
+            if (newUsername && newUsername.trim() && newUsername.trim() !== currentUsername) {
+                currentUsername = newUsername.trim();
+                updateUserInfo();
+                saveData();
+                showNotification('Nome alterado com sucesso!', 'success');
+            }
+        }
+
+        function resetUser() {
+            if (confirm('⚠️ ATENÇÃO: Isso vai apagar TODOS os seus personagens permanentemente!\n\nTem certeza que deseja continuar?')) {
+                if (confirm('Esta ação é IRREVERSÍVEL. Confirma mesmo?')) {
+                    localStorage.removeItem(`rpg_characters_${currentUserId}`);
+                    localStorage.removeItem('rpg_username');
+                    localStorage.removeItem('rpg_user_id');
+                    
+                    // Regenerar ID
+                    currentUserId = generateUniqueId();
+                    localStorage.setItem('rpg_user_id', currentUserId);
+                    currentUsername = 'Jogador';
+                    characters = [];
+                    
+                    updateUserInfo();
+                    renderCharacters();
+                    showNotification('Dados resetados!', 'success');
+                }
+            }
+        }
+
+        function renderCharacters() {
+            const grid = document.getElementById('characterGrid');
+            grid.innerHTML = '';
+
+            // Renderizar personagens existentes
+            characters.forEach((char, index) => {
+                const card = createCharacterCard(char, index);
+                grid.appendChild(card);
+            });
+
+            // Renderizar slots vazios (máximo 6 slots)
+            const maxSlots = 6;
+            const emptySlots = Math.max(0, maxSlots - characters.length);
+            
+            for (let i = 0; i < emptySlots; i++) {
+                const emptySlot = createEmptySlot();
+                grid.appendChild(emptySlot);
+            }
+
+            updateSlotsInfo();
+        }
+
+        function createCharacterCard(char, index) {
+            const card = document.createElement('div');
+            card.className = 'character-card';
+            
+            const bannerStyle = char.banner ? 
+                `background-image: url('${char.banner}'); background-size: cover; background-position: center;` :
+                'background: linear-gradient(45deg, #667eea, #764ba2);';
+            
+            const avatarContent = char.avatar ? 
+                `<img src="${char.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='👤';">` :
+                '👤';
+
+            card.innerHTML = `
+                <div class="character-banner" style="${bannerStyle}">
+                    <div class="character-avatar">
+                        ${avatarContent}
+                    </div>
+                </div>
+                <div class="character-info">
+                    <div class="character-name">${char.name}</div>
+                    <div class="character-details">
+                        <div><strong>Idade:</strong> ${char.age} anos</div>
+                        <div><strong>Altura:</strong> ${char.height}cm</div>
+                        <div><strong>Peso:</strong> ${char.weight}kg</div>
+                        ${char.description ? `<div style="margin-top: 10px;"><strong>História:</strong><br><em>${char.description.substring(0, 100)}${char.description.length > 100 ? '...' : ''}</em></div>` : ''}
+                    </div>
+                    <span class="race-badge race-${char.race}">${char.race.charAt(0).toUpperCase() + char.race.slice(1)}</span>
+                    <div class="char-actions">
+                        <button class="btn btn-secondary" onclick="editCharacter(${index})">Editar</button>
+                        <button class="btn btn-danger" onclick="deleteCharacter(${index})">Excluir</button>
+                        <button class="btn" onclick="duplicateCharacter(${index})" title="Duplicar personagem">Copiar</button>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        function createEmptySlot() {
+            const slot = document.createElement('div');
+            slot.className = 'character-card empty-slot';
+            slot.innerHTML = `
+                <div style="font-size: 48px; margin-bottom: 20px;">➕</div>
+                <h3>Slot Vazio</h3>
+                <p style="margin-bottom: 20px;">Crie um novo personagem</p>
+                <button class="btn" onclick="openCreateModal()">Criar Personagem</button>
+            `;
+            return slot;
+        }
+
+        function openCreateModal() {
+            if (characters.length >= 6) {
+                showNotification('Você atingiu o limite máximo de 6 personagens!', 'error');
+                return;
+            }
+
+            editingCharIndex = -1;
+            document.getElementById('modalTitle').textContent = 'Criar Novo Personagem';
+            document.getElementById('characterForm').reset();
+            document.getElementById('characterModal').style.display = 'block';
+        }
+
+        function editCharacter(index) {
+            editingCharIndex = index;
+            const char = characters[index];
+            
+            document.getElementById('modalTitle').textContent = 'Editar Personagem';
+            document.getElementById('charName').value = char.name;
+            document.getElementById('charAge').value = char.age;
+            document.getElementById('charHeight').value = char.height;
+            document.getElementById('charWeight').value = char.weight;
+            document.getElementById('charRace').value = char.race;
+            document.getElementById('charAvatar').value = char.avatar || '';
+            document.getElementById('charBanner').value = char.banner || '';
+            document.getElementById('charDescription').value = char.description || '';
+            
+            document.getElementById('characterModal').style.display = 'block';
+        }
+
+        function deleteCharacter(index) {
+            if (confirm(`Tem certeza que deseja excluir "${characters[index].name}"?`)) {
+                characters.splice(index, 1);
+                saveData();
+                renderCharacters();
+                showNotification('Personagem excluído!', 'success');
+            }
+        }
+
+        function duplicateCharacter(index) {
+            if (characters.length >= 6) {
+                showNotification('Você atingiu o limite máximo de 6 personagens!', 'error');
+                return;
+            }
+
+            const char = { ...characters[index] };
+            char.name = char.name + ' (Cópia)';
+            char.createdAt = new Date().toISOString();
+            
+            characters.push(char);
+            saveData();
+            renderCharacters();
+            showNotification('Personagem duplicado!', 'success');
+        }
+
+        function closeModal() {
+            document.getElementById('characterModal').style.display = 'none';
+        }
+
+        // Funções de import/export
+        function exportData() {
+            const data = {
+                username: currentUsername,
+                userId: currentUserId,
+                characters: characters,
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `fichas_rpg_${currentUsername}_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('Backup baixado!', 'success');
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.characters && Array.isArray(data.characters)) {
+                        if (confirm(`Importar ${data.characters.length} personagens do backup?\n\nIsso vai SUBSTITUIR todos os seus personagens atuais!`)) {
+                            characters = data.characters;
+                            if (data.username) {
+                                currentUsername = data.username;
+                            }
+                            
+                            saveData();
+                            updateUserInfo();
+                            renderCharacters();
+                            showNotification('Backup restaurado com sucesso!', 'success');
+                        }
+                    } else {
+                        showNotification('Arquivo de backup inválido!', 'error');
+                    }
+                } catch (error) {
+                    showNotification('Erro ao ler arquivo de backup!', 'error');
+                    console.error(error);
+                }
+            };
+            reader.readAsText(file);
+            
+            // Limpar input
+            event.target.value = '';
+        }
+
+        // Evento de submissão do formulário
+        document.getElementById('characterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const charData = {
+                name: document.getElementById('charName').value,
+                age: parseInt(document.getElementById('charAge').value),
+                height: parseInt(document.getElementById('charHeight').value),
+                weight: parseInt(document.getElementById('charWeight').value),
+                race: document.getElementById('charRace').value,
+                avatar: document.getElementById('charAvatar').value,
+                banner: document.getElementById('charBanner').value,
+                description: document.getElementById('charDescription').value,
+                createdAt: editingCharIndex >= 0 ? characters[editingCharIndex].createdAt : new Date().toISOString(),
+                lastModified: new Date().toISOString()
+            };
+            
+            if (editingCharIndex >= 0) {
+                // Editando personagem existente
+                characters[editingCharIndex] = charData;
+                showNotification('Personagem atualizado!', 'success');
+            } else {
+                // Criando novo personagem
+                if (characters.length >= 6) {
+                    showNotification('Você atingiu o limite máximo de 6 personagens!', 'error');
+                    return;
+                }
+                characters.push(charData);
+                showNotification('Personagem criado!', 'success');
+            }
+            
+            saveData();
+            closeModal();
+            renderCharacters();
+        });
+
+        // Função para mostrar notificações
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const colors = {
+                success: '#4ecdc4',
+                error: '#e74c3c',
+                info: '#ff6b6b'
+            };
+            
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${colors[type] || colors.info};
+                color: white;
+                padding: 15px 25px;
+                border-radius: 8px;
+                z-index: 10000;
+                font-weight: bold;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                animation: slideIn 0.3s ease;
+            `;
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            const modal = document.getElementById('characterModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+
+        // Adicionar animações CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Auto-salvar a cada mudança
+        document.addEventListener('beforeunload', function() {
+            saveData();
+        });
+    </script>
+</body>
+</html>
